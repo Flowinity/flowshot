@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+SPDX-FileCopyrightText: none
+SPDX-License-Identifier: CC0-1.0
+-->
+<component type="desktop-application">
+  <id>com.flowinity.flowshot2</id>
+  
+  <metadata_license>CC0-1.0</metadata_license>
+
+  <project_license>GPL-3.0-or-later</project_license>
+
+  <name>Flowshot</name>
+  
+  <translation type="qt">flowshot</translation>
+
+  <developer id="com.flowinity">
+    <name>Flowinity Developers</name>
+  </developer>
+
+  <supports>
+	<control>touch</control>
+  </supports>
+  
+  <recommends>
+    <control>keyboard</control>
+    <control>pointing</control>
+  </recommends>
+
+  <summary>An automatic Flowinity/PrivateUploader upload wrapper for screenshot utilities.</summary>
+
+  <description>
+    An automatic Flowinity/PrivateUploader upload wrapper for screenshot utilities.
+  </description>
+
+  <content_rating type="oars-1.1" />
+
+  <url type="homepage">https://github.com/Flowinity/flowshot</url>
+  <url type="bugtracker">https://github.com/Flowinity/flowshot/issues</url>
+
+  <launchable type="desktop-id">com.flowinity.flowshot2.desktop</launchable>
+
+  <branding>
+    <color type="primary" scheme_preference="light">#000000</color>
+    <color type="primary" scheme_preference="dark">#FFFFFF</color>
+  </branding>
+
+  <categories>
+    <!-- the list can be found in https://specifications.freedesktop.org/menu-spec/latest/category-registry.html -->
+    <category>Utility</category>
+    <category>Graphics</category>
+  </categories>
+
+  <releases>
+    <release version="20.0.0" date="2025-10-24"/>
+  </releases>
+</component>
+

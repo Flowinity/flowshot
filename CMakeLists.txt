@@ -17,6 +17,9 @@ else()
 endif()
 
 
+set(CMAKE_INSTALL_PREFIX "/usr")
+set(CMAKE_INSTALL_BINDIR "bin")
+
 add_executable(flowshot main.cpp main.h
         data/flowshot2.rc
         utils/filenamehandler.cpp

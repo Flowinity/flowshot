@@ -112,3 +112,8 @@ endif ()
 
 qt_add_resources(RESOURCES resources.qrc)
 target_sources(flowshot PRIVATE ${RESOURCES})
+
+install(TARGETS flowshot
+        EXPORT flowshot-targets
+        BUNDLE DESTINATION ${CMAKE_INSTALL_BINDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})

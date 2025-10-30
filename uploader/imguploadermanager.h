@@ -22,11 +22,16 @@ public:
     explicit ImgUploaderManager(QObject* parent = nullptr);
 
     ImgUploaderBase* uploader(const QPixmap& capture,
+                              bool fromScreenshotUtility,
                               QWidget* parent = nullptr);
-    ImgUploaderBase* uploader(const QString& imgUploaderPlugin);
-
+    ImgUploaderBase* uploader(const QString& path,
+                              bool fromScreenshotUtility,
+                              QWidget* parent = nullptr);
     const QString& url();
     const QString& uploaderPlugin();
+
+signals:
+    // void uploadFinished(ImgUploaderBase* uploader);
 
 private:
     void init();

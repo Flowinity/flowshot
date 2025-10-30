@@ -52,6 +52,7 @@ SPDX-License-Identifier: CC0-1.0
   </categories>
 
   <releases>
+    <release version="20.0.1" date="2025-10-30"/>
     <release version="20.0.0" date="2025-10-24"/>
   </releases>
 </component>

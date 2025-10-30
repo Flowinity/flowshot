@@ -4,6 +4,7 @@
 
 #include "ScreenshotManager.h"
 
+#include <QNetworkAccessManager>
 #include <QTimer>
 
 #include "Application.h"
@@ -38,11 +39,11 @@ namespace Flowshot
 
                     if (QFile::exists(filePath))
                     {
-                        QPixmap pixmap(filePath);
-                        if (!pixmap.isNull())
+                        // QPixmap pixmap(filePath);
+                        // if (!pixmap.isNull())
                         {
-                            ImgUploaderManager uploaderManager;
-                            ImgUploaderBase* widget = ImgUploaderManager().uploader(pixmap);
+                            ImgUploaderManager* uploaderManager = new ImgUploaderManager(m_NetworkAM);
+                            ImgUploaderBase* widget = uploaderManager->uploader(filePath, true);
 
                             m_openWindowCount++;
 
@@ -59,9 +60,16 @@ namespace Flowshot
                             QObject::connect(
                                 widget, &ImgUploaderBase::uploadOk, [=, this](const QUrl& url)
                                 {
+                                    AbstractLogger::info() << "URL" << url.toString();
                                     if (ConfigHandler().copyURLAfterUpload())
                                     {
-                                        Clipboard::copyToClipboard(url.toString(), url.toString());
+                                        // I dunno why this works, because shouldn't it be on the main thread already
+                                        QObject* receiver = qApp;
+                                        QMetaObject::invokeMethod(receiver, [url]() {
+                                            if (ConfigHandler().copyURLAfterUpload()) {
+                                                Clipboard::copyToClipboard(url.toString(), url.toString());
+                                            }
+                                        }, Qt::QueuedConnection);
                                         widget->showPostUploadDialog(m_openWindowCount);
 
                                         // Disconnect all signals after upload completes
@@ -107,10 +115,9 @@ namespace Flowshot
 
                             emit screenshotUploaded(filePath);
                         }
-                        else
-                        {
-                            AbstractLogger::warning() << "Failed to load screenshot pixmap:" << filePath;
-                        }
+                        // {
+                            // AbstractLogger::warning() << "Failed to load screenshot pixmap:" << filePath;
+                        // }
                     }
                     else
                     {

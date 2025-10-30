@@ -115,6 +115,7 @@ public:
     CONFIG_GETTER_SETTER(savePath, setSavePath, QString)
     CONFIG_GETTER_SETTER(savePathFixed, setSavePathFixed, bool)
     CONFIG_GETTER_SETTER(saveAsFileExtension, setSaveAsFileExtension, QString)
+    CONFIG_GETTER_SETTER(filenamePattern, setFilenamePattern, QString);
 
     // DEFAULTS
     QString filenamePatternDefault();

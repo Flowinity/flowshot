@@ -7,6 +7,8 @@
 #include <QUrl>
 #include <QWidget>
 
+#include "responses/FlowinityValidUploadResponse.h"
+
 class QNetworkReply;
 class QNetworkAccessManager;
 class QUrl;
@@ -17,14 +19,17 @@ class PrivateUploader : public ImgUploaderBase
 {
     Q_OBJECT
 public:
-    explicit PrivateUploader(const QPixmap& capture, QWidget* parent = nullptr);
+    explicit PrivateUploader(const QPixmap& capture, QWidget* parent = nullptr, bool fromScreenshotUtility = false);
+    explicit PrivateUploader(const QString& filePath, QWidget* parent = nullptr, bool fromScreenshotUtility = false);
+
     void deleteImage(const QString& fileName, const QString& deleteToken);
     void uploadBytes(const QByteArray& bytes);
 
 private slots:
-    void handleReply(QNetworkReply* reply);
+    void handleReply(FlowinityValidUploadResponse reply);
 
 private:
     QNetworkAccessManager* m_NetworkAM;
+    bool m_fromScreenshotUtility;
     void upload();
 };

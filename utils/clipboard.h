@@ -7,6 +7,7 @@
 
 #include <QDBusMessage>
 #include <QDBusConnection>
+#include <QFile>
 
 class QString;
 
@@ -33,7 +34,7 @@ namespace Flowshot
         static void copyToClipboard(const QPixmap& capture);
         static void copyToClipboard(const QString& text,
                                     const QString& notification = "");
-        static bool saveToFilesystemGUI(const QPixmap& capture);
+        static bool saveToFilesystemGUI(const QString& sourceFilePath);
     };
 }
 

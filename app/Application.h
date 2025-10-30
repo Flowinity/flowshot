@@ -20,6 +20,7 @@ public:
 
     void init(bool noTray);
     void takeScreenshot() const;
+    void uploadFile(QString path) const;
 
     signals:
         void ready();

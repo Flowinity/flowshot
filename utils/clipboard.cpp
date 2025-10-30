@@ -205,72 +205,68 @@ namespace Flowshot
         }
     }
 
-    bool Clipboard::saveToFilesystemGUI(const QPixmap& capture)
-{
-    bool okay = false;
-    ConfigHandler config;
-    QString defaultSavePath = ConfigHandler().savePath();
-    if (defaultSavePath.isEmpty() || !QDir(defaultSavePath).exists() ||
-        !QFileInfo(defaultSavePath).isWritable()) {
-        defaultSavePath =
-          QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
-    }
-    QString savePath = FileNameHandler().properScreenshotPath(
-      defaultSavePath, ConfigHandler().saveAsFileExtension());
-#if defined(Q_OS_MACOS)
-    for (QWidget* widget : qApp->topLevelWidgets()) {
-        QString className(widget->metaObject()->className());
-        if (0 ==
-            className.compare(CaptureWidget::staticMetaObject.className())) {
-            widget->showNormal();
-            widget->hide();
-            break;
-        }
-    }
-#endif
-    if (!config.savePathFixed()) {
-        savePath = ShowSaveFileDialog(QObject::tr("Save screenshot"), savePath);
-    }
-    if (savePath == "") {
-        return okay;
-    }
-
-    QFile file{ savePath };
-    if (!file.open(QIODevice::WriteOnly))
+    bool Clipboard::saveToFilesystemGUI(const QString& sourceFilePath)
     {
-        AbstractLogger::error() << "Unable to open config file.";
-    }
+        QFile sourceFile(sourceFilePath);
 
-    QString saveExtension;
-    saveExtension = QFileInfo(savePath).suffix().toLower();
-    if (saveExtension == "jpg" || saveExtension == "jpeg") {
-        okay = capture.save(&file, nullptr, ConfigHandler().jpegQuality());
-    } else {
-        okay = capture.save(&file);
-    }
-
-    if (okay) {
-        // Don't use QDir::separator() here, as Qt internally always uses '/'
-        QString pathNoFile = savePath.left(savePath.lastIndexOf('/'));
-
-        ConfigHandler().setSavePath(pathNoFile);
-
-        QString msg = QObject::tr("Capture saved as ") + savePath;
-        AbstractLogger().attachNotificationPath(savePath) << msg;
-    } else {
-        QString msg = QObject::tr("Error trying to save as ") + savePath;
-
-        if (file.error() != QFile::NoError) {
-            msg += ": " + file.errorString();
+        if (!sourceFile.exists()) {
+            AbstractLogger::error() << "Source file does not exist:" << sourceFilePath;
+            return false;
         }
 
-        QMessageBox saveErrBox(
-          QMessageBox::Warning, QObject::tr("Save Error"), msg);
-        saveErrBox.exec();
-    }
+        QString defaultSavePath = ConfigHandler().savePath();
+        if (defaultSavePath.isEmpty() || !QDir(defaultSavePath).exists() ||
+            !QFileInfo(defaultSavePath).isWritable()) {
+            defaultSavePath = QStandardPaths::writableLocation(QStandardPaths::PicturesLocation);
+            }
 
-    return okay;
-}
+        QString fileName = QFileInfo(sourceFilePath).fileName();
+        QString suggestedPath = QDir(defaultSavePath).filePath(fileName);
+
+        QString savePath = QFileDialog::getSaveFileName(
+            nullptr,
+            QObject::tr("Save File"),
+            suggestedPath
+        );
+
+        if (savePath.isEmpty()) {
+            return false; // user canceled
+        }
+
+        QFile destFile(savePath);
+        if (destFile.exists()) {
+            destFile.remove(); // overwrite if needed
+        }
+
+        if (!sourceFile.open(QIODevice::ReadOnly)) {
+            AbstractLogger::error() << "Unable to open source file:" << sourceFilePath;
+            return false;
+        }
+
+        if (!destFile.open(QIODevice::WriteOnly)) {
+            AbstractLogger::error() << "Unable to open destination file:" << savePath;
+            return false;
+        }
+
+        // 4MiB chunks
+        char buffer[4194304];
+        qint64 bytesRead;
+        while ((bytesRead = sourceFile.read(buffer, sizeof(buffer))) > 0) {
+            if (destFile.write(buffer, bytesRead) != bytesRead) {
+                AbstractLogger::error() << "Failed to write to destination file:" << savePath;
+                return false;
+            }
+        }
+
+        destFile.flush();
+        sourceFile.close();
+        destFile.close();
+
+        ConfigHandler().setSavePath(QFileInfo(savePath).absolutePath());
+        QString msg = QObject::tr("File saved as ") + savePath;
+
+        return true;
+    }
 
 
 QString Clipboard::ShowSaveFileDialog(const QString& title, const QString& directory)
@@ -307,4 +303,4 @@ QString Clipboard::ShowSaveFileDialog(const QString& title, const QString& direc
 }
 }
 
-Clipboard* Clipboard::m_instance = nullptr;
+Flowshot::Clipboard* Flowshot::Clipboard::m_instance = nullptr;

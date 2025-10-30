@@ -8,6 +8,8 @@
 #include <QProcess>
 #include "../utils/rng.h"
 #include <QFile>
+#include <QNetworkAccessManager>
+
 #include "../uploader/imguploadermanager.h"
 #include <qpixmap.h>
 
@@ -25,8 +27,13 @@ namespace Flowshot {
     private:
         int m_openWindowCount = 0;
         bool m_isTakingScreenshot = false;
+        QNetworkAccessManager* m_NetworkAM;
+
     public:
-        explicit ScreenshotManager(QObject* parent = nullptr) : QObject(parent) {}
+        explicit ScreenshotManager(QObject* parent = nullptr) : QObject(parent)
+        {
+            m_NetworkAM = new QNetworkAccessManager(this);
+        }
 
         void takeScreenshot(ScreenshotUtility util);
 

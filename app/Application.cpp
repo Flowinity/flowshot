@@ -7,6 +7,7 @@
 #include "../utils/clipboard.h"
 #include "../utils/ConfigHandler.h"
 #include "../utils/abstractlogger.h"
+#include "pages/settings/configEntry.h"
 #include "pages/settings/generalconf2.h"
 
 namespace Flowshot
@@ -23,12 +24,12 @@ namespace Flowshot
             {
                 takeScreenshot();
             });
-            GeneralConf* settingsWindow = new GeneralConf();
-            menu->addAction("Settings", [settingsWindow]()
+            ConfigEntry* configEntry = new ConfigEntry();
+            menu->addAction("Settings", [configEntry]()
             {
-                settingsWindow->show();
-                settingsWindow->raise();
-                settingsWindow->activateWindow();
+                configEntry->show();
+                configEntry->raise();
+                configEntry->activateWindow();
             });
 
             menu->addAction("Quit", this, &QCoreApplication::quit);
@@ -70,5 +71,10 @@ namespace Flowshot
     void Application::takeScreenshot() const
     {
         m_screenshotManager->takeScreenshot(ScreenshotUtility::SPECTACLE);
+    }
+
+    void Application::uploadFile(QString path) const
+    {
+
     }
 }

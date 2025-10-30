@@ -12,5 +12,24 @@
       <arg name="captureMode" type="q" direction="in"/>
     </method>
 
+    <!--
+       uploadFile:
+       @path: Absolute path of file upload.
+
+       Allows the user to upload to Flowinity over DBus.
+    -->
+    <method name="uploadFile">
+      <arg name="path" type="s" direction="in"/>
+    </method>
+
+    <!--
+       compressAndUploadFolder:
+       @path: Absolute path of file upload.
+
+       Allows the user to upload to Flowinity over DBus.
+    -->
+    <method name="compressAndUploadFolder">
+      <arg name="path" type="s" direction="in"/>
+    </method>
   </interface>
 </node>

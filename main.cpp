@@ -8,6 +8,7 @@
 #include <QDBusMessage>
 #include <QCommandLineParser>
 
+#include "app/pages/settings/configEntry.h"
 #include "app/pages/settings/generalconf2.h"
 #include "utils/abstractlogger.h"
 
@@ -73,12 +74,12 @@ int main(int argc, char **argv) {
         flowshotApp.init(true);
         flowshotApp.takeScreenshot();
 
-        QObject::connect(&flowshotApp, &Application::dialogClosed, &QCoreApplication::quit);
+        QObject::connect(&flowshotApp, &Flowshot::Application::dialogClosed, &QCoreApplication::quit);
 
         return app.exec();
     }
     else if (command == "config") {
-        GeneralConf* settingsWindow = new GeneralConf();
+        ConfigEntry* settingsWindow = new ConfigEntry();
         settingsWindow->show();
         settingsWindow->raise();
         settingsWindow->activateWindow();

@@ -26,7 +26,7 @@ FileNameHandler::FileNameHandler(QObject* parent)
 
 QString FileNameHandler::parsedPattern()
 {
-    return parseFilename(ConfigHandler().filenamePatternDefault());
+    return parseFilename(ConfigHandler().filenamePattern());
 }
 
 QString FileNameHandler::parseFilename(const QString& name)

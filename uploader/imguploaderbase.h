@@ -25,12 +25,16 @@ namespace Flowshot
 
     public:
         explicit ImgUploaderBase(const QPixmap& capture, QWidget* parent = nullptr);
+        void Init();
+        explicit ImgUploaderBase(const QString& filePath, QWidget* parent = nullptr);
 
         LoadSpinner* spinner();
 
         const QUrl& imageURL();
         void setImageURL(const QUrl&);
         const QPixmap& pixmap();
+        const QString& filePath();
+        void setFilePath(const QString&);
         void setPixmap(const QPixmap&);
         void setInfoLabelText(const QString&);
 
@@ -60,6 +64,7 @@ namespace Flowshot
 
     private:
         QPixmap m_pixmap;
+        QString m_filePath;
 
         QVBoxLayout* m_vLayout;
         QHBoxLayout* m_hLayout;

@@ -32,6 +32,8 @@ add_executable(flowshot main.cpp main.h
         utils/abstractlogger.h
         utils/strfparse.cpp
         utils/strfparse.h
+        utils/strftimechooserwidget.cpp
+        utils/strftimechooserwidget.h
         utils/desktopinfo.cpp
         utils/desktopinfo.h
         utils/clipboard.cpp
@@ -59,7 +61,19 @@ add_executable(flowshot main.cpp main.h
         utils/clipboard.cpp
         utils/clipboard.h
         app/pages/settings/generalconf2.cpp
-        app/pages/settings/generalconf2.h)
+        app/pages/settings/generalconf2.h
+        app/pages/settings/filenameEditor.cpp
+        app/pages/settings/filenameEditor.h
+        app/pages/settings/configEntry.cpp
+        app/pages/settings/configEntry.h
+        uploader/privateuploader/PrivateUploaderUploadV2.cpp
+        uploader/privateuploader/PrivateUploaderUploadV2.h
+        config/experiments.h
+        config/experiments.cpp
+        uploader/privateuploader/PrivateUploaderUploadHandler.cpp
+        uploader/privateuploader/PrivateUploaderUploadHandler.h
+        uploader/privateuploader/responses/FlowinityValidUploadResponse.cpp
+        uploader/privateuploader/responses/FlowinityValidUploadResponse.h)
 
 target_link_libraries(flowshot PRIVATE
         Qt6::Core

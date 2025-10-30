@@ -93,11 +93,12 @@ static QMap<class QString, QSharedPointer<ValueHandler>>
     OPTION("serverEndpoints", String("https://flowinity.com/endpoints.json")),
     OPTION("serverAPIEndpoint", String("https://api.flowinity.com/v3")),
     OPTION("serverSupportsEndpoints", Bool(true)),
-    OPTION("screenshotUtility", BoundedInt(0, ScreenshotUtilityMax, static_cast<int>(ScreenshotUtility::SPECTACLE))),
+    OPTION("screenshotUtility", BoundedInt(0, Flowshot::ScreenshotUtilityMax, static_cast<int>(Flowshot::ScreenshotUtility::SPECTACLE))),
     OPTION("copyURLAfterUpload"          ,Bool               ( true          )),
     OPTION("savePath"                    ,ExistingDir        (               )),
     OPTION("savePathFixed"               ,Bool               ( false         )),
     OPTION("saveAsFileExtension"         ,SaveFileExtension  (               )),
+    OPTION("filenamePattern"             ,FilenamePattern    ( {}            )),
 };
 
 // clang-format on

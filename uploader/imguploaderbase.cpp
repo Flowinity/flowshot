@@ -8,6 +8,7 @@
 #include <QClipboard>
 #include <QCursor>
 #include <QDesktopServices>
+#include <QFile>
 #include <QGuiApplication>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -32,19 +33,30 @@ ImgUploaderBase::ImgUploaderBase(const QPixmap& capture, QWidget* parent)
   : QWidget(parent)
   , m_pixmap(capture)
 {
-    // FlameshotDaemon::copyToClipboard("");
+    Init();
+}
+
+ImgUploaderBase::ImgUploaderBase(const QString& filePath, QWidget* parent)
+  : QWidget(parent)
+  , m_filePath(filePath)
+{
+    Init();
+}
+
+void ImgUploaderBase::Init()
+{
+    Clipboard::copyToClipboard("");
     if (!ConfigHandler().uploadWindowEnabled()) {
         return;
     }
     setWindowTitle(tr("Upload image"));
-    // setWindowIcon(QIcon(GlobalValues::iconPath()));
 
     setAttribute(Qt::WA_ShowWithoutActivating);
     setWindowFlags(Qt::BypassWindowManagerHint | Qt::WindowStaysOnTopHint |
                    Qt::FramelessWindowHint | Qt::WindowDoesNotAcceptFocus |
                    Qt::Tool);
 
-    m_infoLabel = new QLabel(tr("Uploading image..."));
+    m_infoLabel = new QLabel(tr("Uploading file..."));
     m_infoLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
     m_infoLabel->setCursor(QCursor(Qt::IBeamCursor));
 
@@ -152,6 +164,16 @@ const QPixmap& ImgUploaderBase::pixmap()
     return m_pixmap;
 }
 
+const QString& ImgUploaderBase::filePath()
+{
+    return m_filePath;
+}
+
+void ImgUploaderBase::setFilePath(const QString& filePath)
+{
+    m_filePath = filePath;
+}
+
 void ImgUploaderBase::setPixmap(const QPixmap& pixmap)
 {
     m_pixmap = pixmap;
@@ -184,7 +206,7 @@ void ImgUploaderBase::updateProgress(int percentage)
         return;
     }
 
-    m_infoLabel->setText(tr("Uploading image... %1%").arg(percentage));
+    m_infoLabel->setText(tr("Uploading file... %1%").arg(percentage));
 }
 
 void ImgUploaderBase::showErrorUploadDialog(QNetworkReply* error)
@@ -204,7 +226,7 @@ void ImgUploaderBase::showErrorUploadDialog(QNetworkReply* error)
             m_infoLabel->setText(tr("%1").arg(errorMessage));
         }
     } else {
-        m_infoLabel->setText(tr("Error uploading image: %1")
+        m_infoLabel->setText(tr("Error uploading file: %1")
                                .arg(error->errorString()));
     }
     m_closeTimer->start();
@@ -235,7 +257,7 @@ void ImgUploaderBase::showPostUploadDialog(int open) {
 
     QHBoxLayout* imageAndUrlLayout = new QHBoxLayout;
 
-    if(ConfigHandler().uploadWindowImageEnabled()) {
+    if(ConfigHandler().uploadWindowImageEnabled() && !m_pixmap.isNull()) {
         auto* imageLabel = new ImageLabel();
 
         imageLabel->setScreenshot(
@@ -270,12 +292,18 @@ void ImgUploaderBase::showPostUploadDialog(int open) {
         QHBoxLayout* buttonsLayout = new QHBoxLayout;
         m_copyUrlButton = new QPushButton(tr("Copy URL"));
         m_openUrlButton = new QPushButton(tr("Open URL"));
-        m_toClipboardButton = new QPushButton(tr("Copy Image"));
-        m_saveToFilesystemButton = new QPushButton(tr("Save Image"));
+        if (!m_pixmap.isNull())
+        {
+            m_toClipboardButton = new QPushButton(tr("Copy File"));
+        }
+        m_saveToFilesystemButton = new QPushButton(tr("Save File"));
 
         buttonsLayout->addWidget(m_copyUrlButton);
         buttonsLayout->addWidget(m_openUrlButton);
-        buttonsLayout->addWidget(m_toClipboardButton);
+        if (!m_pixmap.isNull())
+        {
+            buttonsLayout->addWidget(m_toClipboardButton);
+        }
         buttonsLayout->addWidget(m_saveToFilesystemButton);
 
         connect(m_copyUrlButton,
@@ -286,10 +314,13 @@ void ImgUploaderBase::showPostUploadDialog(int open) {
                 &QPushButton::clicked,
                 this,
                 &ImgUploaderBase::openURL);
-        connect(m_toClipboardButton,
-                &QPushButton::clicked,
-                this,
-                &ImgUploaderBase::copyImage);
+        if (!m_pixmap.isNull())
+        {
+            connect(m_toClipboardButton,
+                    &QPushButton::clicked,
+                    this,
+                    &ImgUploaderBase::copyImage);
+        }
         connect(m_saveToFilesystemButton,
                 &QPushButton::clicked,
                 this,
@@ -315,7 +346,13 @@ void ImgUploaderBase::copyURL()
 
 void ImgUploaderBase::copyImage()
 {
-    Clipboard::copyToClipboard(m_pixmap);
+    if (!m_pixmap) return;
+    // we need the hi-res pixmap
+    QPixmap pixmap(m_filePath);
+    if (!pixmap.isNull())
+    {
+        Clipboard::copyToClipboard(pixmap);
+    }
 }
 
 void ImgUploaderBase::deleteCurrentImage()
@@ -327,7 +364,7 @@ void ImgUploaderBase::deleteCurrentImage()
 
 void ImgUploaderBase::saveScreenshotToFilesystem()
 {
-    if (!Clipboard::saveToFilesystemGUI(m_pixmap)) {
+    if (!Clipboard::saveToFilesystemGUI(m_filePath)) {
         return;
     }
 }

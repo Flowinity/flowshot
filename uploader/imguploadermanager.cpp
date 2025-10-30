@@ -13,8 +13,8 @@
 using namespace Flowshot;
 
 ImgUploaderManager::ImgUploaderManager(QObject* parent)
-  : QObject(parent)
-  , m_imgUploaderBase(nullptr)
+    : QObject(parent)
+      , m_imgUploaderBase(nullptr)
 {
     // TODO - implement ImgUploader for other Storages and selection among them
     m_imgUploaderPlugin = IMG_UPLOADER_STORAGE_DEFAULT;
@@ -36,6 +36,7 @@ void ImgUploaderManager::init()
 }
 
 ImgUploaderBase* ImgUploaderManager::uploader(const QPixmap& capture,
+                                              bool fromScreenshotUtility,
                                               QWidget* parent)
 {
     // TODO - implement ImgUploader for other Storages and selection among them,
@@ -48,19 +49,43 @@ ImgUploaderBase* ImgUploaderManager::uploader(const QPixmap& capture,
     //      (ImgUploaderBase*)(new ImgurUploader(capture, parent));
     //}
     m_imgUploaderBase =
-      (ImgUploaderBase*)(new PrivateUploader(capture, parent));
-    if (m_imgUploaderBase && !capture.isNull()) {
+        (ImgUploaderBase*)(new PrivateUploader(capture, parent, fromScreenshotUtility));
+    if (m_imgUploaderBase && !capture.isNull())
+    {
         m_imgUploaderBase->upload();
     }
 
+    // connect(m_imgUploaderBase, &ImgUploaderBase::upload, this, [this](ImgUploaderBase* uploader){
+    // emit uploadFinished(uploader);
+    // });
     return m_imgUploaderBase;
 }
 
-ImgUploaderBase* ImgUploaderManager::uploader(const QString& imgUploaderPlugin)
+
+ImgUploaderBase* ImgUploaderManager::uploader(const QString& path,
+                                              bool fromScreenshotUtility,
+                                              QWidget* parent)
 {
-    m_imgUploaderPlugin = imgUploaderPlugin;
-    init();
-    return uploader(QPixmap());
+    // TODO - implement ImgUploader for other Storages and selection among them,
+    // example:
+    // if (uploaderPlugin().compare("s3") == 0) {
+    //    m_imgUploaderBase =
+    //      (ImgUploaderBase*)(new ImgS3Uploader(capture, parent));
+    //} else {
+    //    m_imgUploaderBase =
+    //      (ImgUploaderBase*)(new ImgurUploader(capture, parent));
+    //}
+    m_imgUploaderBase =
+        (ImgUploaderBase*)(new PrivateUploader(path, parent, fromScreenshotUtility));
+    if (m_imgUploaderBase && !path.isNull())
+    {
+        m_imgUploaderBase->upload();
+    }
+
+    // connect(m_imgUploaderBase, &ImgUploaderBase::upload, this, [this](ImgUploaderBase* uploader){
+    // emit uploadFinished(uploader);
+    // });
+    return m_imgUploaderBase;
 }
 
 const QString& ImgUploaderManager::uploaderPlugin()

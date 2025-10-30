@@ -20,7 +20,17 @@ void FlowshotDbusAdapter::captureScreen(const QString& captureMode)
     if (!ok || captureModeInt < 0 || captureModeInt > 3)
         return;
 
-    if (auto app = qobject_cast<Application*>(parent())) {
+    if (auto app = qobject_cast<Flowshot::Application*>(parent())) {
         app->takeScreenshot();
+    }
+}
+
+void FlowshotDbusAdapter::uploadFile(const QString& path)
+{
+#ifdef MEASURE_INIT_TIME
+    qputenv("FLAMESHOT_INIT_TIME", QByteArray::number(QDateTime::currentMSecsSinceEpoch()));
+#endif
+    if (auto app = qobject_cast<Flowshot::Application*>(parent())) {
+        app->uploadFile(path);
     }
 }

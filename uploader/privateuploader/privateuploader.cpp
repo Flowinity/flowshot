@@ -18,70 +18,103 @@
 #include <QShortcut>
 #include <QUrlQuery>
 #include <iostream>
+#include <utility>
+#include <QImageReader>
+
+#include "PrivateUploaderUploadHandler.h"
+#include "PrivateUploaderUploadV2.h"
+#include "../../config/experiments.h"
+#include "../../utils/abstractlogger.h"
+
+class PrivateUploaderUploadV2;
 using namespace Flowshot;
 
-    PrivateUploader::PrivateUploader(const QPixmap& capture, QWidget* parent)
+    PrivateUploader::PrivateUploader(const QPixmap& capture, QWidget* parent, bool fromScreenshotUtility)
       : ImgUploaderBase(capture, parent)
     {
         m_NetworkAM = new QNetworkAccessManager(this);
-        connect(m_NetworkAM,
-                &QNetworkAccessManager::finished,
-                this,
-                &PrivateUploader::handleReply);
+        m_fromScreenshotUtility = fromScreenshotUtility;
     }
 
-    void PrivateUploader::handleReply(QNetworkReply* reply)
+    PrivateUploader::PrivateUploader(const QString& filePath, QWidget* parent, bool fromScreenshotUtility)
+  : ImgUploaderBase(filePath, parent)
     {
-        m_currentImageName.clear();
-        if (reply->error() == QNetworkReply::NoError) {
-            QJsonDocument response = QJsonDocument::fromJson(reply->readAll());
-            QJsonObject json = response.object();
-            setImageURL(json[QStringLiteral("url")].toString());
-            QJsonObject upload = json[QStringLiteral("upload")].toObject();
+        m_NetworkAM = new QNetworkAccessManager(this);
+        m_fromScreenshotUtility = fromScreenshotUtility;
+    }
 
-            // save history
-            m_currentImageName = imageURL().toString();
-            int lastSlash = m_currentImageName.lastIndexOf("/");
-            if (lastSlash >= 0) {
-                m_currentImageName = m_currentImageName.mid(lastSlash + 1);
-            }
-
-            emit uploadOk(imageURL());
-        } else {
-            emit uploadError(reply);
+    void PrivateUploader::handleReply(FlowinityValidUploadResponse response)
+    {
+        m_currentImageName = response.getUrl();
+        int lastSlash = m_currentImageName.lastIndexOf("/");
+        if (lastSlash >= 0) {
+            m_currentImageName = m_currentImageName.mid(lastSlash + 1);
         }
-        new QShortcut(Qt::Key_Escape, this, SLOT(close()));
+
+        setImageURL(response.getUrl());
+        setFilePath(response.getFilePath());
+        if (m_fromScreenshotUtility && ConfigHandler().uploadWindowImageEnabled())
+        {
+            QImageReader reader(response.getFilePath());
+            reader.setAutoTransform(true);
+            QSize originalSize = reader.size();
+            QSize scaledSize = originalSize;
+            scaledSize.scale(QSize(512, 512), Qt::KeepAspectRatio);
+            reader.setScaledSize(scaledSize);
+
+            QImage img = reader.read();
+            if (!img.isNull()) {
+                QPixmap pixmap = QPixmap::fromImage(img);
+                setPixmap(pixmap);
+            }
+        }
+        emit uploadOk(response.getUrl());
+
+        // Create shortcut on the main thread - use 'this' as parent to ensure proper thread affinity
+        QShortcut* shortcut = new QShortcut(Qt::Key_Escape, this);
+        connect(shortcut, &QShortcut::activated, this, &PrivateUploader::close);
     }
 
     void PrivateUploader::upload()
     {
+        bool useByteArray = m_fromScreenshotUtility && !pixmap().isNull();
         QByteArray byteArray;
         QBuffer buffer(&byteArray);
-        pixmap().save(&buffer, "PNG");
+        if (useByteArray)
+        {
+            pixmap().save(&buffer, "PNG");
+        }
 
-        PrivateUploaderUpload* uploader = new PrivateUploaderUpload(this);
-        connect(uploader,
-                &PrivateUploaderUpload::uploadOk,
-                [this, uploader, &buffer](QNetworkReply* reply) {
-                    handleReply(reply);
-                    uploader->deleteLater();
-                });
-        connect(uploader,
-                &PrivateUploaderUpload::uploadError,
-                this,
-                &PrivateUploader::handleReply);
-        const QString& fileName =
-          FileNameHandler().parsedPattern().toLower().endsWith(".png")
-            ? FileNameHandler().parsedPattern()
-            : FileNameHandler().parsedPattern() + ".png";
-        uploader->uploadBytes(byteArray, fileName, "image/png");
-        buffer.close();
-        byteArray.clear();
+        // if (Experiments::FLOWSHOT2_USE_NEW_UPLOAD_BACKEND == 1)
+        {
+            PrivateUploaderUploadHandler* uploader = new PrivateUploaderUploadHandler(m_NetworkAM, nullptr);
+            connect(uploader,
+                    &PrivateUploaderUploadHandler::uploadOk,
+                    [this, uploader](FlowinityValidUploadResponse response) {
+                        handleReply(std::move(response));
+                        uploader->deleteLater();
+                    });
+            const QString& fileName =
+              FileNameHandler().parsedPattern().toLower().endsWith(".png")
+                ? FileNameHandler().parsedPattern()
+                : FileNameHandler().parsedPattern() + ".png";
+            AbstractLogger::info() << filePath();
+            if (!filePath().isNull()) {
+                uploader->uploadFile(filePath(), fileName, "image/png");
+            } else if (useByteArray)
+            {
+                uploader->uploadBytes(byteArray, fileName, "image/png");
+            }
+            buffer.close();
+            byteArray.clear();
 
-        connect(uploader,
-                &PrivateUploaderUpload::uploadProgress,
-                this,
-                &PrivateUploader::updateProgress);
+            connect(uploader,
+                    &PrivateUploaderUploadHandler::uploadProgress,
+                    this,
+                    &PrivateUploader::updateProgress);
+        }
+
+        AbstractLogger::info() << "PrivateUploader::upload() completed";
     }
 
     void PrivateUploader::deleteImage(const QString& fileName,

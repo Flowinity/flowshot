@@ -251,7 +251,7 @@ void GeneralConf::initWindowOffsets()
             &GeneralConf::uploadWindowButtonsEnabledEdited);
 
     // reset button
-    auto* resetButton = new QPushButton(tr("Reset Window Options"), this);
+    auto* resetButton = new QPushButton(tr("Reset Window Options"), parentWidget());
     connect(resetButton, &QPushButton::clicked, this, [this]() {
         m_uploadWindowOffsetY->setValue(100);
         m_uploadWindowOffsetX->setValue(10);
@@ -262,18 +262,18 @@ void GeneralConf::initWindowOffsets()
         m_uploadWindowImageWidth->setValue(125);
     });
 
-    auto* testButton = new QPushButton(tr("Test Window"), this);
+    auto* testButton = new QPushButton(tr("Test Window"), parentWidget());
 
     connect(testButton, &QPushButton::clicked, this, [this]() {
-        ImgUploaderBase* widget = ImgUploaderManager().uploader(nullptr);
+        // Flowshot::ImgUploaderBase* widget = ImgUploaderManager(nullptr).uploader(nullptr, parentWidget());
 
-        m_openWindowCount++;
+        // m_openWindowCount++;
 
-        QObject::connect(
-          widget, &QObject::destroyed, [this]() { m_openWindowCount--; });
+        // QObject::connect(
+          // widget, &QObject::destroyed, [this]() { m_openWindowCount--; });
 
-        widget->showPreUploadDialog(m_openWindowCount);
-        widget->showPostUploadDialog(m_openWindowCount);
+        // widget->showPreUploadDialog(m_openWindowCount);
+        // widget->showPostUploadDialog(m_openWindowCount);
     });
 
     vboxLayout->addWidget(m_uploadWindowEnabled);

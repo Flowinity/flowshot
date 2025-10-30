@@ -36,6 +36,7 @@ namespace Flowshot {
         }
 
         void takeScreenshot(ScreenshotUtility util);
+        void uploadFile(const QString& filePath, bool fromScreenshotUtility);
 
     signals:
         void screenshotTaken(const QString &filePath);

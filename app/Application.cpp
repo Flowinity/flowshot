@@ -75,6 +75,6 @@ namespace Flowshot
 
     void Application::uploadFile(QString path) const
     {
-
+        m_screenshotManager->uploadFile(path, false);
     }
 }

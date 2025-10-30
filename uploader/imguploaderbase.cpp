@@ -45,6 +45,7 @@ ImgUploaderBase::ImgUploaderBase(const QString& filePath, QWidget* parent)
 
 void ImgUploaderBase::Init()
 {
+    setWindowOpacity(0.95);
     Clipboard::copyToClipboard("");
     if (!ConfigHandler().uploadWindowEnabled()) {
         return;

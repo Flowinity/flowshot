@@ -20,6 +20,7 @@
 #include <iostream>
 #include <utility>
 #include <QImageReader>
+#include <QMimeDatabase>
 
 #include "PrivateUploaderUploadHandler.h"
 #include "PrivateUploaderUploadV2.h"
@@ -94,13 +95,19 @@ using namespace Flowshot;
                         handleReply(std::move(response));
                         uploader->deleteLater();
                     });
-            const QString& fileName =
-              FileNameHandler().parsedPattern().toLower().endsWith(".png")
-                ? FileNameHandler().parsedPattern()
-                : FileNameHandler().parsedPattern() + ".png";
+            QString fileName = nullptr;
+            if (m_fromScreenshotUtility)
+            {
+                fileName = FileNameHandler().parsedPattern() + ".png";
+            } else
+            {
+                fileName = FileNameHandler().parseFilename(filePath());
+            }
             AbstractLogger::info() << filePath();
+            QMimeDatabase db;
+            QMimeType mime = db.mimeTypeForFile(filePath());
             if (!filePath().isNull()) {
-                uploader->uploadFile(filePath(), fileName, "image/png");
+                uploader->uploadFile(filePath(), fileName, mime.name());
             } else if (useByteArray)
             {
                 uploader->uploadBytes(byteArray, fileName, "image/png");

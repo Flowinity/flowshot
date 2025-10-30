@@ -4,6 +4,8 @@
 
 #include "generalconf2.h"
 
+#include "../../../uploader/privateuploader/privateuploader.h"
+
 GeneralConf::GeneralConf(QWidget* parent)
     : QWidget(parent), m_endpoints(new EndpointsJSON(this))
 {
@@ -88,12 +90,6 @@ void GeneralConf::initWindowOffsets()
     m_uploadWindowEnabled =
       new QCheckBox(tr("Enable Upload Notification"), this);
     m_uploadWindowEnabled->setChecked(ConfigHandler().uploadWindowEnabled());
-    auto* uploadWindowEnabledWarning =
-      new QLabel(tr("WAYLAND USERS: This upload notification window does not "
-                    "currently function correctly under Wayland. Please "
-                    "disable or force X11 (XCB) mode in Force Qt Platform."),
-                 this);
-    uploadWindowEnabledWarning->setWordWrap(true);
 
     auto* posY = new QHBoxLayout();
     auto* posYLabel = new QLabel(tr("Position Offset Y (px)"), this);
@@ -265,19 +261,22 @@ void GeneralConf::initWindowOffsets()
     auto* testButton = new QPushButton(tr("Test Window"), parentWidget());
 
     connect(testButton, &QPushButton::clicked, this, [this]() {
-        // Flowshot::ImgUploaderBase* widget = ImgUploaderManager(nullptr).uploader(nullptr, parentWidget());
+        PrivateUploader* widget = (PrivateUploader*)(new PrivateUploader(QString("/usr/share/icons/hicolor/128x128/apps/flowshot2.png"), this, true));
+        FlowinityValidUploadResponse response = FlowinityValidUploadResponse(
+            QString("https://i.flowinity.com/i/placeholder.png"),
+            QString("/usr/share/icons/hicolor/128x128/apps/flowshot2.png"));
+        widget->handleReply(response);
 
-        // m_openWindowCount++;
+        m_openWindowCount++;
 
-        // QObject::connect(
-          // widget, &QObject::destroyed, [this]() { m_openWindowCount--; });
+        QObject::connect(
+          widget, &QObject::destroyed, [this]() { m_openWindowCount--; });
 
-        // widget->showPreUploadDialog(m_openWindowCount);
-        // widget->showPostUploadDialog(m_openWindowCount);
+        widget->showPreUploadDialog(m_openWindowCount);
+        widget->showPostUploadDialog(m_openWindowCount);
     });
 
     vboxLayout->addWidget(m_uploadWindowEnabled);
-    vboxLayout->addWidget(uploadWindowEnabledWarning);
     vboxLayout->addLayout(posY);
     vboxLayout->addLayout(posX);
     vboxLayout->addLayout(scaleW);

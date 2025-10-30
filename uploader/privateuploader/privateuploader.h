@@ -25,7 +25,8 @@ public:
     void deleteImage(const QString& fileName, const QString& deleteToken);
     void uploadBytes(const QByteArray& bytes);
 
-private slots:
+// public because of test window
+public slots:
     void handleReply(FlowinityValidUploadResponse reply);
 
 private:

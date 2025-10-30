@@ -18,6 +18,7 @@
 #include <QShortcut>
 #include <QUrlQuery>
 #include <iostream>
+#include <QFileInfo>
 #include <utility>
 #include <QImageReader>
 #include <QMimeDatabase>
@@ -101,7 +102,8 @@ using namespace Flowshot;
                 fileName = FileNameHandler().parsedPattern() + ".png";
             } else
             {
-                fileName = FileNameHandler().parseFilename(filePath());
+                QFileInfo fileInfo(filePath());
+                fileName = FileNameHandler().parseFilename(fileInfo.fileName());
             }
             AbstractLogger::info() << filePath();
             QMimeDatabase db;

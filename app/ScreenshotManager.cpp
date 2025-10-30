@@ -50,7 +50,7 @@ namespace Flowshot
             // if (!pixmap.isNull())
             {
                 ImgUploaderManager* uploaderManager = new ImgUploaderManager(m_NetworkAM);
-                ImgUploaderBase* widget = uploaderManager->uploader(filePath, true);
+                ImgUploaderBase* widget = uploaderManager->uploader(filePath, fromScreenshotUtility);
 
                 m_openWindowCount++;
 
@@ -97,10 +97,11 @@ namespace Flowshot
                     });
 
                 QObject::connect(
-                    widget, &ImgUploaderBase::dialogClosed, [this, filePath](bool success)
+                    widget, &ImgUploaderBase::dialogClosed, [this, filePath, fromScreenshotUtility](bool success)
                     {
                         if (!filePath.data() || filePath == "") return;
-                        if (QFile::exists(filePath))
+                        // Do not delete files that aren't in the /tmp folder from the screenshot utility
+                        if (QFile::exists(filePath) && fromScreenshotUtility)
                         {
                             if (QFile::remove(filePath))
                             {

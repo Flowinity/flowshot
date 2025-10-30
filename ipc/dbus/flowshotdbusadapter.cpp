@@ -34,3 +34,7 @@ void FlowshotDbusAdapter::uploadFile(const QString& path)
         app->uploadFile(path);
     }
 }
+
+void FlowshotDbusAdapter::checkIfRunning() {
+    //
+}

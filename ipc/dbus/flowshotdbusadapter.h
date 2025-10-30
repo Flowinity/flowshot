@@ -18,5 +18,6 @@ public:
 public slots:
     Q_NOREPLY void captureScreen(const QString& captureMode);
     Q_NOREPLY void uploadFile(const QString& path);
+    Q_NOREPLY void checkIfRunning();
     // Q_NOREPLY void compressAndUploadFolder(const QString& path);
 };

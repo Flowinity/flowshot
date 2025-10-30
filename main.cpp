@@ -1,15 +1,12 @@
 #include <QApplication>
 #include <QWidget>
-
-#include "app/Application.h"
-#include "app/ScreenshotManager.h"
-
-#include <QDBusConnection>
-#include <QDBusMessage>
 #include <QCommandLineParser>
 #include <QDir>
 #include <QFileInfo>
-
+#include <QDBusConnection>
+#include <QDBusMessage>
+#include "app/Application.h"
+#include "app/ScreenshotManager.h"
 #include "app/pages/settings/configEntry.h"
 #include "app/pages/settings/generalconf2.h"
 #include "utils/abstractlogger.h"
@@ -23,9 +20,7 @@ bool sendFlowshotDbusCommand(QString method, const QVariantList &args = {}) {
         "com.flowinity.flowshot2", "/", "com.flowinity.flowshot2", method
     );
 
-    for (const QVariant &arg : args) {
-        msg << arg;
-    }
+    for (const QVariant &arg : args) msg << arg;
 
     QDBusMessage reply = connection.call(msg);
     return reply.type() != QDBusMessage::ErrorMessage;
@@ -35,8 +30,6 @@ bool sendFlowshotDbusCommand(QString method, const QVariantList &args = {}) {
 }
 
 int main(int argc, char **argv) {
-    // We need this hack because Wayland doesn't support "tool" overlay windows.
-    // We don't want the environment variable just in case it affects Spectacle which we want in Wayland mode.
     bool platformSet = false;
     for (int i = 1; i < argc; ++i) {
         if (QString(argv[i]).startsWith("-platform")) {
@@ -47,7 +40,6 @@ int main(int argc, char **argv) {
 
     static const char* platformArgs[] = {"-platform", "xcb"};
     if (!platformSet) {
-        // Append -platform xcb to argv
         char** newArgv = new char*[argc + 2];
         for (int i = 0; i < argc; ++i) newArgv[i] = argv[i];
         newArgv[argc] = const_cast<char*>(platformArgs[0]);
@@ -58,68 +50,66 @@ int main(int argc, char **argv) {
 
     QApplication app(argc, argv);
 
-    // Command-line parser
     QCommandLineParser parser;
-    parser.addPositionalArgument("command", "gui or config");
-    parser.process(app);
-    QString command;
-    const QStringList args = parser.positionalArguments();
-    if (!args.isEmpty()) command = args.first();
-    AbstractLogger::info() << command;
+    parser.setApplicationDescription("Flowshot2 help");
+    parser.addHelpOption();
+    parser.addPositionalArgument("up", "up {file} - Upload a file to Flowinity.");
+    parser.addPositionalArgument("config", "Open the Flowshot Configuration menu.");
+    parser.addPositionalArgument("gui", "Quickly take a screenshot.");
+    parser.addPositionalArgument("{file}", "Alias for up {file}. Upload a file to Flowinity.");
+    parser.addPositionalArgument("[none]", "Run the Flowshot system tray service.");
 
-    Flowshot::Application flowshotApp;
+    parser.process(app);
+    const QStringList args = parser.positionalArguments();
+
     QApplication::setApplicationName("Flowshot2");
     QApplication::setOrganizationName("Flowinity");
     QApplication::setOrganizationDomain("flowinity.com");
 
-    if (command == "gui") {
-        if (sendFlowshotDbusCommand("captureScreen", {"1"})) {
-            return 0;
-        }
-        flowshotApp.init(true);
-        flowshotApp.takeScreenshot();
-
-        QObject::connect(&flowshotApp, &Flowshot::Application::dialogClosed, &QCoreApplication::quit);
-
+    if (args.isEmpty()) {
+        Flowshot::Application flowshotApp;
+        flowshotApp.init(false);
+        Flowshot::ScreenshotManager manager;
         return app.exec();
     }
-    else if (command == "config") {
+
+    QString command = args.first();
+
+    if (command == "gui") {
+        Flowshot::Application flowshotApp;
+        if (sendFlowshotDbusCommand("captureScreen", {"1"})) return 0;
+        flowshotApp.init(true);
+        flowshotApp.takeScreenshot();
+        QObject::connect(&flowshotApp, &Flowshot::Application::dialogClosed, &QCoreApplication::quit);
+        return app.exec();
+    } else if (command == "config") {
         ConfigEntry* settingsWindow = new ConfigEntry();
         settingsWindow->show();
         settingsWindow->raise();
         settingsWindow->activateWindow();
         return app.exec();
-    } else if (!command.isNull()) {
-        QString filePath = command;
-
-        // Resolve to absolute path if it's a relative path
-        QFileInfo fileInfo(filePath);
-        if (!fileInfo.isAbsolute()) {
-            filePath = QFileInfo(QDir::current(), filePath).absoluteFilePath();
-        }
-
-        // Ensure the file exists
-        if (!QFile::exists(filePath)) {
-            AbstractLogger::error() << "File does not exist:" << filePath;
-            return 1;
-        }
-
-        // Attempt D-Bus upload
-        if (sendFlowshotDbusCommand("uploadFile", {filePath})) {
-            return 0;
-        }
-
-        // If D-Bus upload failed, proceed with screenshot flow
-        flowshotApp.init(true);
-        flowshotApp.takeScreenshot();
-
-        QObject::connect(&flowshotApp, &Flowshot::Application::dialogClosed, &QCoreApplication::quit);
-        return app.exec();
     }
 
+    QString filePath;
+    if (command == "up" && args.size() > 1) {
+        filePath = args.at(1);
+    } else {
+        filePath = command;
+    }
 
-    // Default GUI behavior
-    flowshotApp.init(false);
-    Flowshot::ScreenshotManager manager;
+    QFileInfo fileInfo(filePath);
+    if (!fileInfo.isAbsolute()) filePath = QFileInfo(QDir::current(), filePath).absoluteFilePath();
+
+    if (!QFile::exists(filePath)) {
+        AbstractLogger::error() << "File does not exist:" << filePath;
+        return 1;
+    }
+
+    if (sendFlowshotDbusCommand("uploadFile", {filePath})) return 0;
+
+    Flowshot::Application flowshotApp;
+    flowshotApp.init(true);
+    flowshotApp.takeScreenshot();
+    QObject::connect(&flowshotApp, &Flowshot::Application::dialogClosed, &QCoreApplication::quit);
     return app.exec();
 }

@@ -31,5 +31,13 @@
     <method name="compressAndUploadFolder">
       <arg name="path" type="s" direction="in"/>
     </method>
+
+    <!--
+       checkIfRunning:
+
+       Check if flowshot2 is already running.
+    -->
+    <method name="checkIfRunning">
+    </method>
   </interface>
 </node>

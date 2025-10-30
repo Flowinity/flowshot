@@ -1,0 +1,15 @@
+[Desktop Entry]
+Type=Service
+X-KDE-ServiceTypes=KonqPopupMenu/Plugin
+X-KDE-Priority=TopLevel
+MimeType=application/octet-stream;
+Actions=uploadToFlowinity;
+
+[Desktop Action uploadToFlowinity]
+TryExec=flowshot
+Exec=flowshot up %f
+Icon=flowshot2
+
+Name=Upload to Flowinity
+
+Comment=Run Flowshot

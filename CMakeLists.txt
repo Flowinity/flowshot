@@ -125,7 +125,7 @@ if (UNIX)
 
     # Install service menus
     configure_file(${CMAKE_SOURCE_DIR}/data/servicemenus/flowshot2-upload-file.desktop
-            ${CMAKE_CURRENT_BINARY_DIR}/share/kio/servicemenus/ COPYONLY)
+            ${CMAKE_CURRENT_BINARY_DIR}/share/kio/servicemenus/flowshot2-upload-file.desktop COPYONLY)
 
     # Install assets
     install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/share/ DESTINATION ${CMAKE_INSTALL_DATAROOTDIR})

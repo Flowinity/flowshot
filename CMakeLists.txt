@@ -123,6 +123,10 @@ if (UNIX)
     configure_file(${CMAKE_SOURCE_DIR}/data/img/hicolor/scalable/apps/flowshot2.svg
             ${CMAKE_CURRENT_BINARY_DIR}/share/icons/hicolor/scalable/apps/flowshot2.svg COPYONLY)
 
+    # Install service menus
+    configure_file(${CMAKE_SOURCE_DIR}/data/servicemenus/flowshot2-upload-file.desktop
+            ${CMAKE_CURRENT_BINARY_DIR}/usr/share/kio/servicemenus/ COPYONLY)
+
     # Install assets
     install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/share/ DESTINATION ${CMAKE_INSTALL_DATAROOTDIR})
 endif ()

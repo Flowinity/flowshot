@@ -107,9 +107,12 @@ int main(int argc, char **argv) {
 
     if (sendFlowshotDbusCommand("uploadFile", {filePath})) return 0;
 
-    Flowshot::Application flowshotApp;
-    flowshotApp.init(true);
-    flowshotApp.takeScreenshot();
-    QObject::connect(&flowshotApp, &Flowshot::Application::dialogClosed, &QCoreApplication::quit);
-    return app.exec();
+    if (!command.isNull())
+    {
+        Flowshot::Application flowshotApp;
+        flowshotApp.init(true);
+        flowshotApp.uploadFile(filePath);
+        QObject::connect(&flowshotApp, &Flowshot::Application::dialogClosed, &QCoreApplication::quit);
+        return app.exec();
+    }
 }

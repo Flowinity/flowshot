@@ -105,7 +105,6 @@ using namespace Flowshot;
                 QFileInfo fileInfo(filePath());
                 fileName = FileNameHandler().parseFilename(fileInfo.fileName());
             }
-            AbstractLogger::info() << filePath();
             QMimeDatabase db;
             QMimeType mime = db.mimeTypeForFile(filePath());
             if (!filePath().isNull()) {
@@ -122,8 +121,6 @@ using namespace Flowshot;
                     this,
                     &PrivateUploader::updateProgress);
         }
-
-        AbstractLogger::info() << "PrivateUploader::upload() completed";
     }
 
     void PrivateUploader::deleteImage(const QString& fileName,

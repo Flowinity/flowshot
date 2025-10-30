@@ -57,7 +57,7 @@ void PrivateUploaderUpload::uploadToServer(const QByteArray& postData, const QSt
     request.setRawHeader("Authorization", token.toUtf8());
     request.setRawHeader("Content-Type", "multipart/form-data; boundary=" + boundary);
 
-    emit uploadProgress(0);
+    emit uploadProgress(0, 0);
 
     QNetworkReply* reply = m_NetworkAM->post(request, postData);
 
@@ -77,7 +77,7 @@ void PrivateUploaderUpload::uploadToServer(const QByteArray& postData, const QSt
     connect(reply, &QNetworkReply::uploadProgress, [this, reply](qint64 bytesSent, qint64 bytesTotal) {
         if (bytesTotal == 0)
             return;
-        emit uploadProgress(bytesSent * 100 / bytesTotal);
+        emit uploadProgress(bytesSent * 100 / bytesTotal, 0);
     });
 }
 

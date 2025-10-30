@@ -33,7 +33,7 @@ namespace Flowshot
     {
         // Must send notification before clipboard modification on linux
         if (!notification.isEmpty()) {
-            AbstractLogger::info() << notification;
+            // AbstractLogger::info() << notification;
         }
 
         m_hostingClipboard = true;

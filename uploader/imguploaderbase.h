@@ -45,14 +45,15 @@ namespace Flowshot
     signals:
         void uploadOk(const QUrl& url);
         void deleteOk();
-        void uploadProgress(int progress);
+        void uploadProgress(int progress, double speed);
+        void uploadSpeed(double speed);
         void uploadError(QNetworkReply* error);
         void dialogClosed(bool success);
 
     public slots:
         void showPostUploadDialog(int open);
         void showPreUploadDialog(int open);
-        void updateProgress(int percentage);
+        void updateProgress(int percentage, double speed);
 
     private slots:
         void startDrag();

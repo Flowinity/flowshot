@@ -79,7 +79,6 @@ void EndpointsJSON::getAPIEndpoint(bool refresh) {
     });
 
     connect(this, &EndpointsJSON::endpointOk, this, [this](QString endpoint) {
-        AbstractLogger::info() << "API endpoint: " << endpoint;
         disconnect(this, &EndpointsJSON::endpointOk, nullptr, nullptr);
         ConfigHandler().setServerAPIEndpoint(endpoint);
         ConfigHandler().setServerSupportsEndpoints(true);

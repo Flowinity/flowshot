@@ -201,13 +201,13 @@ void ImgUploaderBase::showPreUploadDialog(int open)
     move(QPoint(x(), y() - offset));
 }
 
-void ImgUploaderBase::updateProgress(int percentage)
+void ImgUploaderBase::updateProgress(int percentage, double speed)
 {
     if (!m_infoLabel || !ConfigHandler().uploadWindowEnabled()) {
         return;
     }
 
-    m_infoLabel->setText(tr("Uploading file... %1%").arg(percentage));
+    m_infoLabel->setText(tr("Uploading file... %1% (%2Mbps)").arg(percentage).arg(speed));
 }
 
 void ImgUploaderBase::showErrorUploadDialog(QNetworkReply* error)

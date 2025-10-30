@@ -10,6 +10,7 @@
 #include <QFile>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
+#include <QElapsedTimer>
 
 #include "responses/FlowinityValidUploadResponse.h"
 
@@ -29,48 +30,16 @@ public:
     void cancelUpload();
 
     signals:
-        void uploadProgress(int progress);
+        void uploadProgress(int progress, double speed);
         void uploadOk(FlowinityValidUploadResponse response);
         void uploadError(QNetworkReply* reply);
 
 private:
-    void uploadToServer(QIODevice* headerDevice, QIODevice* fileDevice, QIODevice* footerDevice, qint64 totalSize, const QString& url, const
-                        QString& token, const QByteArray& boundary);
-
     QNetworkAccessManager* m_NetworkAM;
     QNetworkReply* m_currentReply;
     QString m_filePath;
-};
-
-class StreamingUploadDevice : public QIODevice
-{
-    Q_OBJECT
-
-public:
-    StreamingUploadDevice(QFile* file, const QByteArray& header, const QByteArray& footer, QObject* parent = nullptr);
-    ~StreamingUploadDevice();
-
-    bool open(OpenMode mode) override;
-    void close() override;
-    qint64 size() const override;
-    qint64 bytesAvailable() const override;
-    bool isSequential() const override;
-    bool atEnd() const override;
-
-protected:
-    qint64 readData(char* data, qint64 maxSize) override;
-    qint64 writeData(const char* data, qint64 maxSize) override;
-
-private:
-    QFile* m_file;
-    QByteArray m_header;
-    QByteArray m_footer;
-    qint64 m_headerPos;
-    qint64 m_filePos;
-    qint64 m_footerPos;
-    qint64 m_totalSize;
-    bool m_headerSent;
-    bool m_fileSent;
+    qint64 m_lastBytesSent = 0;
+    QElapsedTimer m_lastTime;
 };
 
 #endif // PRIVATEUPLOADERUPLOAD_H

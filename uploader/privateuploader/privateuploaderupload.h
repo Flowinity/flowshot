@@ -35,7 +35,7 @@ public slots:
 signals:
     void uploadOk(QNetworkReply* reply);
     void uploadError(QNetworkReply* error);
-    void uploadProgress(int progress);
+    void uploadProgress(int progress, double speed);
 
 private:
     QNetworkAccessManager* m_NetworkAM;

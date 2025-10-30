@@ -22,7 +22,7 @@ public slots:
     void cancel();
 
     signals:
-        void uploadProgress(int progress);
+        void uploadProgress(int progress, double speed);
     void uploadOk(FlowinityValidUploadResponse response);
     void uploadError(QNetworkReply* reply);
 

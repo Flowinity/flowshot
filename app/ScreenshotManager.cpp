@@ -67,7 +67,6 @@ namespace Flowshot
                 QObject::connect(
                     widget, &ImgUploaderBase::uploadOk, [=, this](const QUrl& url)
                     {
-                        AbstractLogger::info() << "URL" << url.toString();
                         if (ConfigHandler().copyURLAfterUpload())
                         {
                             // I dunno why this works, because shouldn't it be on the main thread already
@@ -85,9 +84,9 @@ namespace Flowshot
                         }
                     });
                 QObject::connect(
-                    widget, &ImgUploaderBase::uploadProgress, [=](int progress)
+                    widget, &ImgUploaderBase::uploadProgress, [=](int progress, double speed)
                     {
-                        widget->updateProgress(progress);
+                        widget->updateProgress(progress, speed);
                     });
 
                 QObject::connect(
@@ -112,7 +111,7 @@ namespace Flowshot
                                 AbstractLogger::warning() << "File failed to delete: " << filePath;
                             }
                         }
-                        else
+                        else if (fromScreenshotUtility)
                         {
                             AbstractLogger::warning() << "File doesn't exist: " << filePath;
                         }

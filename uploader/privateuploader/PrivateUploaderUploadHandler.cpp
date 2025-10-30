@@ -35,7 +35,6 @@ PrivateUploaderUploadHandler::PrivateUploaderUploadHandler(QNetworkAccessManager
 
 PrivateUploaderUploadHandler::~PrivateUploaderUploadHandler()
 {
-    AbstractLogger::info() << "PrivateUploaderUploadHandler destructor called";
     if (m_thread->isRunning()) {
         m_thread->quit();
         if (!m_thread->wait(3000)) {
